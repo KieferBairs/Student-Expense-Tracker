@@ -1,4 +1,3 @@
-// ExpenseScreen.js
 import React, { useEffect, useState } from 'react';
 import {
   SafeAreaView,
@@ -26,7 +25,6 @@ export default function ExpenseScreen() {
     );
     setExpenses(rows);
   };
-
   const addExpense = async () => {
     const amountNumber = parseFloat(amount);
 
@@ -43,11 +41,9 @@ export default function ExpenseScreen() {
       return;
     }
 
-    const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
-
     await db.runAsync(
-      'INSERT INTO expenses (amount, category, note, date) VALUES (?, ?, ?, ?);',
-      [amountNumber, trimmedCategory, trimmedNote || null, today]
+      'INSERT INTO expenses (amount, category, note) VALUES (?, ?, ?);',
+      [amountNumber, trimmedCategory, trimmedNote || null]
     );
 
     setAmount('');
@@ -57,22 +53,19 @@ export default function ExpenseScreen() {
     loadExpenses();
   };
 
+
   const deleteExpense = async (id) => {
     await db.runAsync('DELETE FROM expenses WHERE id = ?;', [id]);
     loadExpenses();
   };
 
+
   const renderExpense = ({ item }) => (
     <View style={styles.expenseRow}>
       <View style={{ flex: 1 }}>
-        <Text style={styles.expenseAmount}>
-          ${Number(item.amount).toFixed(2)}
-        </Text>
+        <Text style={styles.expenseAmount}>${Number(item.amount).toFixed(2)}</Text>
         <Text style={styles.expenseCategory}>{item.category}</Text>
         {item.note ? <Text style={styles.expenseNote}>{item.note}</Text> : null}
-        {item.date ? (
-          <Text style={styles.expenseDate}>{item.date}</Text>
-        ) : null}
       </View>
 
       <TouchableOpacity onPress={() => deleteExpense(item.id)}>
@@ -88,8 +81,7 @@ export default function ExpenseScreen() {
           id INTEGER PRIMARY KEY AUTOINCREMENT,
           amount REAL NOT NULL,
           category TEXT NOT NULL,
-          note TEXT,
-          date TEXT NOT NULL
+          note TEXT
         );
       `);
 
@@ -185,10 +177,6 @@ const styles = StyleSheet.create({
   expenseNote: {
     fontSize: 12,
     color: '#9ca3af',
-  },
-  expenseDate: {
-    fontSize: 12,
-    color: '#6b7280',
   },
   delete: {
     color: '#f87171',
