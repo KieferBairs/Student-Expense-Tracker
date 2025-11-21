@@ -40,11 +40,13 @@ export default function ExpenseScreen() {
       // Category is required
       return;
     }
+const today = new Date().toISOString().slice(0, 10); // "YYYY-MM-DD"
 
-    await db.runAsync(
-      'INSERT INTO expenses (amount, category, note) VALUES (?, ?, ?);',
-      [amountNumber, trimmedCategory, trimmedNote || null]
-    );
+await db.runAsync(
+  'INSERT INTO expenses (amount, category, note, date) VALUES (?, ?, ?, ?);',
+  [amountNumber, trimmedCategory, trimmedNote || null, today]
+);
+
 
     setAmount('');
     setCategory('');
@@ -82,6 +84,7 @@ export default function ExpenseScreen() {
           amount REAL NOT NULL,
           category TEXT NOT NULL,
           note TEXT
+          date TEXT NOT NULL
         );
       `);
 
