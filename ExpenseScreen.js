@@ -19,6 +19,9 @@ export default function ExpenseScreen() {
   const [category, setCategory] = useState('');
   const [note, setNote] = useState('');
   const [filter, setFilter] = useState("all"); // all, week, month
+  const [total, setTotal] = useState(0);
+  const [categoryTotals, setCategoryTotals] = useState({});
+
 
 
   const loadExpenses = async () => {
@@ -55,6 +58,26 @@ export default function ExpenseScreen() {
   // Default: ALL
   return expenses;
 };
+
+const calculateTotals = () => {
+  const filtered = getFilteredExpenses();
+
+  // Overall total
+  const sum = filtered.reduce((acc, exp) => acc + Number(exp.amount), 0);
+  setTotal(sum);
+
+  // Category totals
+  const catTotals = {};
+  filtered.forEach((exp) => {
+    if (!catTotals[exp.category]) {
+      catTotals[exp.category] = 0;
+    }
+    catTotals[exp.category] += Number(exp.amount);
+  });
+
+  setCategoryTotals(catTotals);
+};
+
 
   const addExpense = async () => {
     const amountNumber = parseFloat(amount);
@@ -127,9 +150,31 @@ export default function ExpenseScreen() {
     setup();
   }, []);
 
+  useEffect(() => {
+  calculateTotals();
+}, [expenses, filter]);
+
   return (
     <SafeAreaView style={styles.container}>
       <Text style={styles.heading}>Student Expense Tracker</Text>
+
+      {/* 🔵 TOTALS UI */}
+    <View style={{ marginBottom: 16 }}>
+      <Text style={{ color: "#fff", fontSize: 18, fontWeight: "600" }}>
+       Total: ${total.toFixed(2)}
+        </Text>
+
+          <Text style={{ color: "#9ca3af", marginTop: 8 }}>
+             By Category:
+           </Text>
+
+        {Object.keys(categoryTotals).map((cat) => (
+         <Text key={cat} style={{ color: "#e5e7eb", marginLeft: 8 }}>
+         • {cat}: ${categoryTotals[cat].toFixed(2)}
+        </Text>
+          ))}
+      </View>
+
 
       <View style={styles.filters}>
         <Button title="All" onPress={() => setFilter("all")} />
