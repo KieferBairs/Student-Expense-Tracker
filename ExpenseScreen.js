@@ -27,6 +27,35 @@ export default function ExpenseScreen() {
     );
     setExpenses(rows);
   };
+
+  const getFilteredExpenses = () => {
+  const now = new Date();
+
+  if (filter === "week") {
+    const startOfWeek = new Date(now);
+    startOfWeek.setDate(now.getDate() - now.getDay()); // Sunday start
+
+    return expenses.filter((exp) => {
+      if (!exp.date) return false;
+      const d = new Date(exp.date);
+      return d >= startOfWeek && d <= now;
+    });
+  }
+
+  if (filter === "month") {
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+
+    return expenses.filter((exp) => {
+      if (!exp.date) return false;
+      const d = new Date(exp.date);
+      return d >= startOfMonth && d <= now;
+    });
+  }
+
+  // Default: ALL
+  return expenses;
+};
+
   const addExpense = async () => {
     const amountNumber = parseFloat(amount);
 
@@ -107,7 +136,7 @@ export default function ExpenseScreen() {
         <Button title="This Week" onPress={() => setFilter("week")} />
         <Button title="This Month" onPress={() => setFilter("month")} />
       </View>
-      
+
       <View style={styles.form}>
         <TextInput
           style={styles.input}
@@ -135,13 +164,14 @@ export default function ExpenseScreen() {
       </View>
 
       <FlatList
-        data={expenses}
+        data={getFilteredExpenses()}
         keyExtractor={(item) => item.id.toString()}
         renderItem={renderExpense}
         ListEmptyComponent={
-          <Text style={styles.empty}>No expenses yet.</Text>
+         <Text style={styles.empty}>No expenses yet.</Text>
         }
       />
+
 
       <Text style={styles.footer}>
         Enter your expenses and they’ll be saved locally with SQLite.
