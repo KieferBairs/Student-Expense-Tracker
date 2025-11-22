@@ -18,6 +18,8 @@ export default function ExpenseScreen() {
   const [amount, setAmount] = useState('');
   const [category, setCategory] = useState('');
   const [note, setNote] = useState('');
+  const [filter, setFilter] = useState("all"); // all, week, month
+
 
   const loadExpenses = async () => {
     const rows = await db.getAllAsync(
@@ -100,6 +102,12 @@ export default function ExpenseScreen() {
     <SafeAreaView style={styles.container}>
       <Text style={styles.heading}>Student Expense Tracker</Text>
 
+      <View style={styles.filters}>
+        <Button title="All" onPress={() => setFilter("all")} />
+        <Button title="This Week" onPress={() => setFilter("week")} />
+        <Button title="This Month" onPress={() => setFilter("month")} />
+      </View>
+      
       <View style={styles.form}>
         <TextInput
           style={styles.input}
@@ -150,6 +158,11 @@ const styles = StyleSheet.create({
     color: '#fff',
     marginBottom: 16,
   },
+  filters: {
+  flexDirection: "row",
+  justifyContent: "space-between",
+  marginBottom: 16,
+},
   form: {
     marginBottom: 16,
     gap: 8,
