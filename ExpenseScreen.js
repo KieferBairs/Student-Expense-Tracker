@@ -21,6 +21,8 @@ export default function ExpenseScreen() {
   const [filter, setFilter] = useState("all"); // all, week, month
   const [total, setTotal] = useState(0);
   const [categoryTotals, setCategoryTotals] = useState({});
+  const [editing, setEditing] = useState(null); // null or { id, amount, category, note, date }
+
 
 
 
@@ -115,6 +117,9 @@ const calculateTotals = () => {
     await db.runAsync('DELETE FROM expenses WHERE id = ?;', [id]);
     loadExpenses();
   };
+  const startEditing = (item) => {
+    setEditing({ ...item }); // copy the item so the user can modify it
+    };
 
 
   const renderExpense = ({ item }) => (
@@ -127,6 +132,10 @@ const calculateTotals = () => {
 
       <TouchableOpacity onPress={() => deleteExpense(item.id)}>
         <Text style={styles.delete}>✕</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity onPress={() => startEditing(item)}>
+        <Text style={styles.edit}>Edit</Text>
       </TouchableOpacity>
     </View>
   );
@@ -249,6 +258,11 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     borderWidth: 1,
     borderColor: '#374151',
+  },
+  edit: {
+  color: "#60a5fa",
+  fontSize: 16,
+  marginLeft: 12,
   },
   expenseRow: {
     flexDirection: 'row',
