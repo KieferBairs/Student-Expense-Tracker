@@ -22,6 +22,8 @@ export default function ExpenseScreen() {
   const [total, setTotal] = useState(0);
   const [categoryTotals, setCategoryTotals] = useState({});
   const [editing, setEditing] = useState(null); // null or { id, amount, category, note, date }
+  const [search, setSearch] = useState("");
+
 
 
 
@@ -36,30 +38,48 @@ export default function ExpenseScreen() {
   const getFilteredExpenses = () => {
   const now = new Date();
 
+  // 🔵 ALWAYS start with all expenses
+  let filtered = expenses;
+
+  // WEEK FILTER
   if (filter === "week") {
     const startOfWeek = new Date(now);
-    startOfWeek.setDate(now.getDate() - now.getDay()); // Sunday start
+    startOfWeek.setDate(now.getDate() - now.getDay());
 
-    return expenses.filter((exp) => {
+    filtered = filtered.filter((exp) => {
       if (!exp.date) return false;
       const d = new Date(exp.date);
       return d >= startOfWeek && d <= now;
     });
   }
 
+  // MONTH FILTER
   if (filter === "month") {
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
 
-    return expenses.filter((exp) => {
+    filtered = filtered.filter((exp) => {
       if (!exp.date) return false;
       const d = new Date(exp.date);
       return d >= startOfMonth && d <= now;
     });
   }
 
-  // Default: ALL
-  return expenses;
+  // 🔍 SEARCH FILTER
+  if (search.trim() !== "") {
+    const query = search.toLowerCase();
+
+    filtered = filtered.filter((exp) => {
+      return (
+        exp.category.toLowerCase().includes(query) ||
+        (exp.note && exp.note.toLowerCase().includes(query)) ||
+        String(exp.amount).includes(query)
+      );
+    });
+  }
+
+  return filtered;
 };
+
 
 const calculateTotals = () => {
   const filtered = getFilteredExpenses();
@@ -200,7 +220,16 @@ const calculateTotals = () => {
         <Button title="All" onPress={() => setFilter("all")} />
         <Button title="This Week" onPress={() => setFilter("week")} />
         <Button title="This Month" onPress={() => setFilter("month")} />
+      
+      {/* Search Feature */}
       </View>
+      <TextInput
+        style={styles.input}
+        placeholder="Search (category, note, amount)"
+        placeholderTextColor="#9ca3af"
+        value={search}
+        onChangeText={setSearch}
+      />
 
       <View style={styles.form}>
         <TextInput
