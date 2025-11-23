@@ -119,8 +119,19 @@ const calculateTotals = () => {
   };
   const startEditing = (item) => {
     setEditing({ ...item }); // copy the item so the user can modify it
-    };
+  };
 
+  const saveEditing = async () => {
+  const { id, amount, category, note, date } = editing;
+
+  await db.runAsync(
+    "UPDATE expenses SET amount = ?, category = ?, note = ?, date = ? WHERE id = ?;",
+    [Number(amount), category.trim(), note ? note.trim() : null, date, id]
+  );
+
+  setEditing(null); // close the edit form
+  await loadExpenses(); // refresh list
+  };
 
   const renderExpense = ({ item }) => (
     <View style={styles.expenseRow}>
@@ -216,8 +227,42 @@ const calculateTotals = () => {
         />
         <Button title="Add Expense" onPress={addExpense} />
       </View>
+        
+  {editing && (
+      <View style={styles.editForm}>
+        <Text style={styles.editHeading}>Edit Expense</Text>
 
-      <FlatList
+        <TextInput
+           style={styles.input}
+           keyboardType="numeric"
+          value={String(editing.amount)}
+          onChangeText={(text) => setEditing({ ...editing, amount: text })}
+        />
+
+        <TextInput
+         style={styles.input}
+         value={editing.category}
+         onChangeText={(text) => setEditing({ ...editing, category: text })}
+        />
+
+        <TextInput
+          style={styles.input}
+          value={editing.note || ""}
+          onChangeText={(text) => setEditing({ ...editing, note: text })}
+        />
+
+    <TextInput
+      style={styles.input}
+      value={editing.date}
+      onChangeText={(text) => setEditing({ ...editing, date: text })}
+    />
+
+    <Button title="Save Changes" onPress={saveEditing} />
+    <Button title="Cancel" onPress={() => setEditing(null)} />
+  </View>
+)}
+
+   <FlatList
         data={getFilteredExpenses()}
         keyExtractor={(item) => item.id.toString()}
         renderItem={renderExpense}
@@ -260,10 +305,28 @@ const styles = StyleSheet.create({
     borderColor: '#374151',
   },
   edit: {
-  color: "#60a5fa",
-  fontSize: 16,
-  marginLeft: 12,
+    color: "#60a5fa",
+    fontSize: 16,
+    marginLeft: 12,
   },
+  editForm: {
+    backgroundColor: "#1f2937",
+    padding: 12,
+    borderRadius: 8,
+    marginBottom: 16,
+  },
+  editHeading: {
+    color: "#fff",
+    fontSize: 18,
+    fontWeight: "600",
+   marginBottom: 8,
+  },
+  edit: {
+    color: "#60a5fa",
+    fontSize: 16,
+    marginLeft: 12,
+  },
+
   expenseRow: {
     flexDirection: 'row',
     alignItems: 'center',
